@@ -1,0 +1,42 @@
+#
+# Spiderfoot Dockerfile Simples - ScanDados
+# Versão simplificada para resolver problemas de build
+#
+
+FROM python:3.11-slim
+
+# Instalar dependências do sistema
+RUN apt-get update && apt-get install -y \
+    gcc \
+    git \
+    curl \
+    swig \
+    libxml2-dev \
+    libxslt-dev \
+    libffi-dev \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Configurar ambiente
+WORKDIR /home/spiderfoot
+
+# Copiar arquivos
+COPY . .
+
+# Instalar dependências Python
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+# Configurar ambiente SpiderFoot
+ENV SPIDERFOOT_DATA /var/lib/spiderfoot
+ENV SPIDERFOOT_LOGS /var/lib/spiderfoot/log
+ENV SPIDERFOOT_CACHE /var/lib/spiderfoot/cache
+
+# Criar diretórios
+RUN mkdir -p $SPIDERFOOT_DATA $SPIDERFOOT_LOGS $SPIDERFOOT_CACHE
+
+# Expor porta
+EXPOSE 5001
+
+# Comando de execução
+CMD ["python", "sf.py", "-l", "0.0.0.0:5001"]
